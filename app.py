@@ -1,11 +1,12 @@
 # Importa os módulos necessários do Flask
 from flask import Flask, request, render_template, redirect, url_for, session, flash
 
-import os 
+import os
 
 # Importa a classe Usuario e funções do models
 from models import Usuario, get_db_connection, init_db
 from functools import wraps
+
 # Cria uma instância da aplicação Flask
 app = Flask(__name__)
 
@@ -15,24 +16,27 @@ app.secret_key = "chavealeatoria_muitosegura"
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'username' not in session:
+        if 'username' not in session:        
+            flash('Você precisa estar logado para acessar esta página', 'error')
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
 
-            flash('você precisa estar logado para acessar esta página', 'error')
-            return redirect(url_for('login'), next=request.url)
 
 
 # Rota para a página inicial
 @app.route('/')
 def index():
- return render_template('index.html')
+   return render_template('index.html')
 
 # Rota para login, aceita métodos GET (mostrar formulário) e POST (processar login)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Se o método for POST, processa a tentativa de login
+
     if 'username' in session:
-        return redirect(url_for('index.html'))
+        return redirect(url_for('index')) 
     
+    # Se o método for POST, processa a tentativa de login
     if request.method == 'POST':
         # Obtém o username e senha do formulário
         username = request.form['username']
@@ -46,13 +50,13 @@ def login():
             # Armazena o username e função na sessão
             session['username'] = user.username
             session['funcao'] = user.funcao
-            # Mensagem de sucesso
-            flash(f'Bem vindo, {user.nome}!', 'sucess')
-            #Redireciona para a página inicial
+
+            #mensagem de sucesso
+            flash(f'Bem vindo, {user.nome}!', 'success')
+            # Redireciona para a página inicial
             return redirect(url_for('index'))
         else:
-            # Retorna mensagem de erro com link para tentar novamente
-            flash(f'Usuário ou senha inválidos', 'error')
+            flash('Usuário ou senha inválidos!', 'error')
     
     # Se o método for GET, exibe o formulário de login
     return render_template('login.html')
@@ -91,5 +95,5 @@ def listar_usuarios():
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)
 
-# Inicializa o banco de dados antes de executar a aplicação
+    # Inicializa o banco de dados antes de executar a aplicação
 init_db()

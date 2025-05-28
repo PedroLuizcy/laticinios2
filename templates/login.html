@@ -1,23 +1,18 @@
-{% extend 'base.html%}
+{% extends 'base.html' %}
 
-{% block title %} Login - {{ super() }} {% endblock %}
+{% block title %} Login - {{ super() }}{% endblock %}
 
 {% block content %}
     <h2>Login</h2>
     <form method="post" class="form">
         <div class="form-group">
-            <label for="username">Usuário</label>
+            <label for="username">Usuário:</label>
             <input type="text" id="username" name="username" required>
         </div>
-
-        
-    </form>
-
-     <form method="post" class="form">
         <div class="form-group">
-            <label for="senha">Senha</label>
+            <label for="senha">Senha:</label>
             <input type="password" id="senha" name="senha" required>
         </div>
-        <button class="btn btn-sucess">Entrar</button>   
+        <button class="btn btn-success">Entrar</button>
     </form>
 {% endblock %}

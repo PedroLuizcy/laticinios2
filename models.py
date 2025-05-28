@@ -95,3 +95,65 @@ class Usuario:
                 user['id_usuario'], user['username'], user['password_hash'], user['funcao'], user['nome']
             )  # Retorna um objeto Usuario se encontrado
         return None  # Retorna None se o usuário não for encontrado
+
+class Area:
+    def __init__(self, id_area, nome, descricao):
+        self.id.area = id_area 
+        self.nome = nome
+        self.descricao = descricao
+
+    @staticmethod
+    def criar(id_area, nome, descricao):
+        conn = get_db_connection() # Obtém uma conexão com o banco
+        try:
+           conn.execute(
+            'INSERT INTO usuarios (id_area, nome, descricao) VALUES (?, ?, ?)',
+            (id_area, nome, descricao)
+        )  # Insere o usuário na tabela
+           conn.commit()  # Confirma a inserção
+           return True
+        except sqlite3.IntegrityError:
+            return False
+        finally: 
+            conn.close()   
+
+    @staticmethod
+    def listar_todas():
+        conn = get_db_connection()
+        areas = conn.execute(
+            'SELECT * FROM areas_armazem ORDER BY nome', (id_area)).fetchall()
+        conn.close()
+        return [Area(a['id_area'], a['nome'], a[descricao] )
+    for a in areas]    
+    
+    @staticmethod 
+    def obter_por_id(id_area):
+        conn = get_db_connection() # Obtém uma conexão com o banco        
+        area = conn.execute('SELECT FROM areas_armazem WHERE id_area = ?', (id_area,)).fetchone()
+        conn.close()
+
+        if area:
+            return Area(area['id_area'], area['nome'], area['descricao'])
+        return None
+    
+    @staticmethod 
+    def atualizar(id_area, nome, descricao):
+        conn = get_db_connection() # Obtém uma conexão com o banco        
+        conn.execute('UPDATE areas_armazem SET nome = ?, descricao = ? WHERE id_area =?', (nome,descricao,id_area))
+        conn.commit()
+        conn.close()
+
+    @staticmethod 
+    def excluir(id_area):
+        conn = get_db_connection()
+        #Veficicar se há produtos nessa área
+        produtos = conn.execute('SELECT COUNT(*) as count FROM produtos_areas WHERE area_id = ?', 
+        (id_area,)).fetchone                       
+        if produtos['count'] > 0:
+            conn.close
+            return False #Não pode excluir áreas com produtos
+        
+        conn.execute("DELETE FROM areas_armazem WHERE id_area = ?", (id_area))
+        conn.commit()
+        conn.close()
+        return True
